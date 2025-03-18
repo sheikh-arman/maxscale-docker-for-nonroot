@@ -1,0 +1,18 @@
+# Use the SingleStore Node base image
+FROM mariadb/maxscale:24.02.4
+
+# Switch to the root user to install packages
+USER root
+
+COPY entrypoint.sh /docker-entrypoint.sh
+
+RUN yum remove -y rsyslog monit && \
+    yum clean all -y && \
+    chmod g=u /etc/passwd && \
+    chmod +x docker-entrypoint.sh && \
+    chmod -R g=u /var/{lib,run,log,cache}/maxscale && \
+    chgrp -R 0 /var/{lib,run,log,cache}/maxscale
+
+USER 997
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["maxscale", "--nodaemon", "--log=stdout"]
